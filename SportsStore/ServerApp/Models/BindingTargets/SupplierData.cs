@@ -26,4 +26,3 @@ namespace ServerApp.Models.BindingTargets
 		};
 	}
 }
-}

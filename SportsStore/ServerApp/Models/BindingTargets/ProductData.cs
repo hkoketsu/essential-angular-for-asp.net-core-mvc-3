@@ -17,7 +17,7 @@ namespace ServerApp.Models.BindingTargets
 		[Required]
 		public string Description { get; set; }
 
-		[Range(1, int.MaxValue, ErrorMessage = "Price must be at least 1"]
+		[Range(1, int.MaxValue, ErrorMessage = "Price must be at least 1")]
 		public decimal Price { get; set; }
 
 		public long Supplier { get; set; }
