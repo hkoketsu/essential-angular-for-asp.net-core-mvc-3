@@ -6,8 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ServerApp.Models;
 using Microsoft.EntityFrameworkCore;
-
-using System.Collections.Generic;
+using ServerApp.Models.BindingTargets;
 
 namespace ServerApp.Controllers
 {
@@ -57,9 +56,22 @@ namespace ServerApp.Controllers
 		}
 
 		[HttpGet]
-		public IEnumerable<Product> GetProducts(bool related = false)
+		public IEnumerable<Product> GetProducts(string category, string search, bool related = false)
 		{
 			IQueryable<Product> query = context.Products;
+			if (!string.IsNullOrWhiteSpace(category))
+			{
+				string catLower = category.ToLower();
+				query = query.Where(p => p.Category.ToLower().Contains(catLower));
+			}
+			if (!string.IsNullOrWhiteSpace(search))
+			{
+				string searchLower = search.ToLower();
+				query = query.Where(p => p.Name.ToLower().Contains(searchLower)
+					|| p.Description.ToLower().Contains(searchLower)
+				);
+			}
+
 			if (related)
 			{
 				query = query.Include(p => p.Supplier).Include(p => p.Ratings);
@@ -80,6 +92,26 @@ namespace ServerApp.Controllers
 			else
 			{
 				return query;
+			}
+		}
+
+		[HttpPost]
+		public IActionResult CreateProduct([FromBody] ProductData pData)
+		{
+			if (ModelState.IsValid)
+			{
+				Product p = pData.Product;
+				if (p.Supplier != null && p.Supplier.SupplierId != 0)
+				{
+					context.Attach(p.Supplier);
+				}
+				context.Add(p);
+				context.SaveChanges();
+				return Ok(p.ProductId);
+			}
+			else
+			{
+				return BadRequest(ModelState);
 			}
 		}
 	}
