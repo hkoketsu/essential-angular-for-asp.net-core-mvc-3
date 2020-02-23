@@ -30,7 +30,8 @@ namespace ServerApp
 			string connectionString = Configuration["ConnectionStrings:DefaultConnection"];
 			services.AddDbContext<DataContext>(options => options.UseSqlServer(connectionString));
 
-			services.AddControllersWithViews();
+			services.AddControllersWithViews()
+				.AddJsonOptions(options => options.JsonSerializerOptions.IgnoreNullValues = true);
 
 			services.AddSwaggerGen(options =>
 				options.SwaggerDoc("v1", new OpenApiInfo { Title = "SportsStore API", Version = "v1" })
