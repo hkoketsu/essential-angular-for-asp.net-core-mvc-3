@@ -29,12 +29,30 @@ namespace ServerApp.Controllers
 		[HttpPost]
 		public IActionResult CreateSupplier([FromBody]SupplierData sData)
 		{
+			Console.WriteLine("Create supplier - " + sData.Name + " valid" + ModelState.IsValid);
 			if (ModelState.IsValid)
 			{
 				Supplier s = sData.Supplier;
 				context.Add(s);
 				context.SaveChanges();
 				return Ok(s.SupplierId);
+			}
+			else
+			{
+				return BadRequest(ModelState);
+			}
+		}
+
+		[HttpPut("{id}")]
+		public IActionResult ReplaceSupplier(long id, [FromBody] SupplierData sdata)
+		{
+			if (ModelState.IsValid)
+			{
+				Supplier s = sdata.Supplier;
+				s.SupplierId = id;
+				context.Update(s);
+				context.SaveChanges();
+				return Ok();
 			}
 			else
 			{

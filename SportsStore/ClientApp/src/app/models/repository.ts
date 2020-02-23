@@ -11,7 +11,7 @@ const suppliersUrl = "/api/suppliers";
 export class Repository {
   product: Product;
   products: Product[];
-  suppliers: Supplier[];
+  suppliers: Supplier[] = [];
   filter: Filter = new Filter();
 
   constructor(private http: HttpClient) {
@@ -67,5 +67,26 @@ export class Repository {
           this.createProduct(product);
         }
       });
+  }
+
+  replaceProduct(product: Product) {
+    const data = {
+      name: product.name,
+      category: product.category,
+      description: product.description,
+      price: product.price,
+      supplier: product.supplier ? product.supplier.supplierId : 0
+    };
+
+    this.http.put(`${productsUrl}/${product.productId}`, data)
+      .subscribe(() => this.getProducts);
+  }
+
+  replaceSupplier(supplier: Supplier) {
+    const data = {
+      name: supplier.name, city: supplier.city, state: supplier.state
+    };
+    this.http.put(`${suppliersUrl}/${supplier.supplierId}`, data)
+      .subscribe(() => this.getProducts());
   }
 }

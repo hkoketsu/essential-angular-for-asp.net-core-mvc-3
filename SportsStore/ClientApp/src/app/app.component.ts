@@ -31,4 +31,16 @@ export class AppComponent {
     let p = new Product(0, "Rocket-Powered Shoes", "Running", "Set a new record", 100, s);
     this.repo.createProductAndSupplier(p, s);
   }
+
+  replaceProduct() {
+    const p = this.repo.products[0];
+    p.name = "Modified Product";
+    p.category = "Modified Category";
+    this.repo.replaceProduct(p);
+  }
+
+  replaceSupplier() {
+    const s = new Supplier(3, "Modified Supplier", "New York", "NY");
+    this.repo.replaceSupplier(s);
+  }
 }
