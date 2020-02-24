@@ -35,6 +35,11 @@ export class Repository {
     this.http.get<Product[]>(url).subscribe(products => this.products = products);
   }
 
+  getSuppliers() {
+    this.http.get<Supplier[]>(suppliersUrl)
+      .subscribe(sups => this.suppliers = sups);
+  }
+
   createProduct(product: Product) {
     const data = {
       name: product.name,
@@ -88,5 +93,18 @@ export class Repository {
     };
     this.http.put(`${suppliersUrl}/${supplier.supplierId}`, data)
       .subscribe(() => this.getProducts());
+  }
+
+  deleteProduct(id: number) {
+    this.http.delete(`${productsUrl}/${id}`)
+      .subscribe(() => this.getProducts());
+  }
+
+  deleteSupplier(id: number) {
+    this.http.delete(`${suppliersUrl}/${id}`)
+      .subscribe(() => {
+        this.getProducts();
+        this.getSuppliers();
+      })
   }
 }
