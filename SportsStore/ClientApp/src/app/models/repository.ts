@@ -7,12 +7,18 @@ import { Supplier } from './supplier.model';
 const productsUrl = "/api/products";
 const suppliersUrl = "/api/suppliers";
 
+type productsMetadata = {
+  data: Product[],
+  categories: string[];
+}
+
 @Injectable()
 export class Repository {
   product: Product;
   products: Product[];
   suppliers: Supplier[] = [];
   filter: Filter = new Filter();
+  categories: string[] = [];
 
   constructor(private http: HttpClient) {
     this.filter.related = true;
@@ -32,7 +38,13 @@ export class Repository {
     if (this.filter.search) {
       url += `&search=${this.filter.search}`;
     }
-    this.http.get<Product[]>(url).subscribe(products => this.products = products);
+    url += "&metadata=true";
+
+    this.http.get<productsMetadata>(url)
+      .subscribe(md => {
+        this.products = md.data;
+        this.categories = md.categories;
+      });
   }
 
   getSuppliers() {
