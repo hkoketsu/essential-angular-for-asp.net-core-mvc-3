@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { ProductSelectionComponent } from './store/productSelection.component';
+import { ProductSelectionComponent } from "./store/productSelection.component";
 
 const routes: Routes = [
   { path: "store/:category/:page", component: ProductSelectionComponent },

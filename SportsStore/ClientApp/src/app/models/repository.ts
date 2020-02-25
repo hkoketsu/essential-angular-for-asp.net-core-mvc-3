@@ -1,8 +1,8 @@
-import { Product } from './product.model';
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Filter } from "./configClasses.repository"
-import { Supplier } from './supplier.model';
+import { Product } from "./product.model";
+import { Injectable } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { Filter, Pagination } from "./configClasses.repository";
+import { Supplier } from "./supplier.model";
 
 const productsUrl = "/api/products";
 const suppliersUrl = "/api/suppliers";
@@ -19,6 +19,7 @@ export class Repository {
   suppliers: Supplier[] = [];
   filter: Filter = new Filter();
   categories: string[] = [];
+  paginationObject = new Pagination();
 
   constructor(private http: HttpClient) {
     this.filter.related = true;
@@ -30,7 +31,7 @@ export class Repository {
       .subscribe(p => this.product = p);
   }
 
-  getProducts(related = false) {
+  getProducts() {
     let url = `${productsUrl}?related=${this.filter.related}`;
     if (this.filter.category) {
       url += `&category=${this.filter.category}`;
@@ -52,58 +53,59 @@ export class Repository {
       .subscribe(sups => this.suppliers = sups);
   }
 
-  createProduct(product: Product) {
-    const data = {
-      name: product.name,
-      category: product.category,
-      description: product.description,
-      price: product.price,
-      supplier: product.supplier ? product.supplier.supplierId : 0
+  createProduct(prod: Product) {
+    let data = {
+      name: prod.name, category: prod.category,
+      description: prod.description, price: prod.price,
+      supplier: prod.supplier ? prod.supplier.supplierId : 0
     };
 
     this.http.post<number>(productsUrl, data)
       .subscribe(id => {
-        product.productId = id;
-        this.products.push(product);
-      })
+        prod.productId = id;
+        this.products.push(prod);
+      });
   }
 
-  createProductAndSupplier(product: Product, supplier: Supplier) {
-    const data = {
-      name: supplier.name,
-      city: supplier.city,
-      state: supplier.state
+  createProductAndSupplier(prod: Product, supp: Supplier) {
+    let data = {
+      name: supp.name, city: supp.city, state: supp.state
     };
 
     this.http.post<number>(suppliersUrl, data)
       .subscribe(id => {
-        supplier.supplierId = id;
-        product.supplier = supplier;
-        this.suppliers.push(supplier);
-        if (product != null) {
-          this.createProduct(product);
+        supp.supplierId = id;
+        prod.supplier = supp;
+        this.suppliers.push(supp);
+        if (prod != null) {
+          this.createProduct(prod);
         }
       });
   }
 
-  replaceProduct(product: Product) {
-    const data = {
-      name: product.name,
-      category: product.category,
-      description: product.description,
-      price: product.price,
-      supplier: product.supplier ? product.supplier.supplierId : 0
+  replaceProduct(prod: Product) {
+    let data = {
+      name: prod.name, category: prod.category,
+      description: prod.description, price: prod.price,
+      supplier: prod.supplier ? prod.supplier.supplierId : 0
     };
-
-    this.http.put(`${productsUrl}/${product.productId}`, data)
-      .subscribe(() => this.getProducts);
+    this.http.put(`${productsUrl}/${prod.productId}`, data)
+      .subscribe(() => this.getProducts());
   }
 
-  replaceSupplier(supplier: Supplier) {
-    const data = {
-      name: supplier.name, city: supplier.city, state: supplier.state
+  replaceSupplier(supp: Supplier) {
+    let data = {
+      name: supp.name, city: supp.city, state: supp.state
     };
-    this.http.put(`${suppliersUrl}/${supplier.supplierId}`, data)
+    this.http.put(`${suppliersUrl}/${supp.supplierId}`, data)
+      .subscribe(() => this.getProducts());
+  }
+
+  updateProduct(id: number, changes: Map<string, any>) {
+    let patch = [];
+    changes.forEach((value, key) =>
+      patch.push({ op: "replace", path: key, value: value }));
+    this.http.patch(`${productsUrl}/${id}`, patch)
       .subscribe(() => this.getProducts());
   }
 
@@ -117,6 +119,6 @@ export class Repository {
       .subscribe(() => {
         this.getProducts();
         this.getSuppliers();
-      })
+      });
   }
 }
