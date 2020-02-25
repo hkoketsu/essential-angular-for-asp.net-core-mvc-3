@@ -1,0 +1,8 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/SportsStore/.vs/SportsStore
+/.vs
+/SportsStore/ServerApp/.vs/ServerApp
+/SportsStore/ServerApp/bin/Debug

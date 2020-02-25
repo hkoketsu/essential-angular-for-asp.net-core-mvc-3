@@ -1,34 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using ServerApp.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Collections.Generic;
 using ServerApp.Models.BindingTargets;
 
 namespace ServerApp.Controllers
 {
 	[Route("api/products")]
 	[ApiController]
-	public class ProductValuesController : ControllerBase
+	public class ProductValuesController : Controller
 	{
 		private DataContext context;
 
-		public ProductValuesController(DataContext context)
+		public ProductValuesController(DataContext ctx)
 		{
-			this.context = context;
+			context = ctx;
 		}
 
 		[HttpGet("{id}")]
 		public Product GetProduct(long id)
 		{
-			//System.Threading.Thread.Sleep(5000);
 			Product result = context.Products
-					.Include(p => p.Supplier).ThenInclude(s => s.Products)
-					.Include(p => p.Ratings)
-					.FirstOrDefault(p => p.ProductId == id);
+				.Include(p => p.Supplier).ThenInclude(s => s.Products)
+				.Include(p => p.Ratings)
+				.FirstOrDefault(p => p.ProductId == id);
+
 			if (result != null)
 			{
 				if (result.Supplier != null)
@@ -57,9 +54,10 @@ namespace ServerApp.Controllers
 
 		[HttpGet]
 		public IActionResult GetProducts(string category, string search,
-			bool related = false, bool metadata = false)
+				bool related = false, bool metadata = false)
 		{
 			IQueryable<Product> query = context.Products;
+
 			if (!string.IsNullOrWhiteSpace(category))
 			{
 				string catLower = category.ToLower();
@@ -69,8 +67,7 @@ namespace ServerApp.Controllers
 			{
 				string searchLower = search.ToLower();
 				query = query.Where(p => p.Name.ToLower().Contains(searchLower)
-					|| p.Description.ToLower().Contains(searchLower)
-				);
+					|| p.Description.ToLower().Contains(searchLower));
 			}
 
 			if (related)
@@ -101,19 +98,17 @@ namespace ServerApp.Controllers
 			return Ok(new
 			{
 				data = products,
-				categories = context.Products
-					.Select(p => p.Category)
-					.Distinct()
-					.OrderBy(c => c)
+				categories = context.Products.Select(p => p.Category)
+					.Distinct().OrderBy(c => c)
 			});
 		}
 
 		[HttpPost]
-		public IActionResult CreateProduct([FromBody] ProductData pData)
+		public IActionResult CreateProduct([FromBody] ProductData pdata)
 		{
 			if (ModelState.IsValid)
 			{
-				Product p = pData.Product;
+				Product p = pdata.Product;
 				if (p.Supplier != null && p.Supplier.SupplierId != 0)
 				{
 					context.Attach(p.Supplier);
@@ -129,11 +124,11 @@ namespace ServerApp.Controllers
 		}
 
 		[HttpPut("{id}")]
-		public IActionResult ReplaceProduct(long id, [FromBody] ProductData pData)
+		public IActionResult ReplaceProduct(long id, [FromBody] ProductData pdata)
 		{
 			if (ModelState.IsValid)
 			{
-				Product p = pData.Product;
+				Product p = pdata.Product;
 				p.ProductId = id;
 				if (p.Supplier != null && p.Supplier.SupplierId != 0)
 				{

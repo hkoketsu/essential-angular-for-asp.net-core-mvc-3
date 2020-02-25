@@ -6,7 +6,8 @@
   </button>
   <button *ngFor="let category of service.categories"
           class="btn btn-outline-primary btn-block"
-          [class.active]="service.currentCategory.toLowerCase() == category.toLowerCase()"
+          [class.active]="service.currentCategory.toLowerCase()
+                == category.toLowerCase()"
           (click)="service.currentCategory = category">
     {{category}}
   </button>
