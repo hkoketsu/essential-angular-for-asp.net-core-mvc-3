@@ -3,9 +3,13 @@ import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Filter, Pagination } from "./configClasses.repository";
 import { Supplier } from "./supplier.model";
+import { Observable } from 'rxjs';
+import { Order, OrderConfirmation } from './order.model';
 
 const productsUrl = "/api/products";
 const suppliersUrl = "/api/suppliers";
+const sessionUrl = "/api/session";
+const orderUrl = "/api/orders";
 
 type productsMetadata = {
   data: Product[],
@@ -20,6 +24,7 @@ export class Repository {
   filter: Filter = new Filter();
   categories: string[] = [];
   paginationObject = new Pagination();
+  orders: Order[] = [];
 
   constructor(private http: HttpClient) {
     this.filter.related = true;
@@ -120,5 +125,37 @@ export class Repository {
         this.getProducts();
         this.getSuppliers();
       });
+  }
+
+  storeSessionData<T>(dataType: string, data: T) {
+    return this.http.post(`${sessionUrl}/${dataType}`, data)
+      .subscribe(response => { });
+  }
+
+  getSessionData<T>(dataType: string): Observable<T> {
+    return this.http.get<T>(`${sessionUrl}/${dataType}`);
+  }
+
+  getOrders() {
+    this.http.get<Order[]>(orderUrl)
+      .subscribe(data => this.orders = data);
+  }
+
+  createOrder(order: Order) {
+    this.http.post<OrderConfirmation>(orderUrl, {
+      name: order.name,
+      address: order.address,
+      payment: order.payment,
+      products: order.products
+    }).subscribe(data => {
+      console.log(data);
+      order.orderConfirmation = data;
+      order.cart.clear();
+      order.clear();
+    })
+  }
+
+  shipOrder(order: Order) {
+    this.http.post(`${orderUrl}/${order.orderId}`, {}).subscribe(() => this.getOrders());
   }
 }
